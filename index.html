@@ -45,7 +45,7 @@
   .lynch .w,.lynch .r,.lynch .p{-webkit-text-stroke:.07em #000;paint-order:stroke fill;
     text-shadow:0 0 1px #000,.04em .04em 0 #000,-.02em .02em 0 #000,0 .06em .18em rgba(0,0,0,.8)}
   .lynch .w{color:#f3eee4}
-  .lynch .r,.lynch .p{color:#c8202c}
+  .lynch .r,.lynch .p{color:#f3eee4}
   .dates{display:flex;flex-direction:column;gap:6px}
   .date-row{display:flex;gap:14px;justify-content:center;font:500 12px/1.4 var(--mono);letter-spacing:.2em;text-transform:uppercase;font-variant-numeric:tabular-nums}
   .date-row .d{color:var(--brass)}
@@ -90,16 +90,15 @@
   :root{--frame:0 0 1px #000,.04em .04em 0 #000,-.02em .02em 0 #000,0 .06em .18em rgba(0,0,0,.8)}
   @keyframes glowRed{0%,100%{text-shadow:var(--frame),0 0 .1em rgba(200,32,44,.25),0 0 .45em rgba(200,32,44,.12)}
     50%{text-shadow:var(--frame),0 0 .16em rgba(236,48,58,.85),0 0 .7em rgba(200,32,44,.55),0 0 1.4em rgba(160,20,30,.35)}}
-  @keyframes glowIvory{0%,100%{text-shadow:var(--frame),0 0 .1em rgba(255,236,200,.12)}
-    50%{text-shadow:var(--frame),0 0 .14em rgba(255,236,200,.55),0 0 .6em rgba(255,220,170,.25)}}
+  @keyframes glowIvory{0%,100%{text-shadow:var(--frame),0 0 .12em rgba(255,236,200,.15),0 0 .8em rgba(200,32,44,.18)}
+    50%{text-shadow:var(--frame),0 0 .16em rgba(255,240,215,.7),0 0 .55em rgba(255,225,185,.35),0 0 1.3em rgba(200,32,44,.45)}}
   @keyframes flicker{0%,61%,63.5%,66%,100%{opacity:1;filter:none}62%{opacity:.55;filter:brightness(.6)}
     64%{opacity:.8}65%{opacity:.45;filter:brightness(.5)}86%{opacity:1}86.6%{opacity:.7}87.2%{opacity:1}}
   @keyframes glowDate{0%,100%{text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 0 rgba(201,162,74,0)}
     50%{text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 8px rgba(233,190,95,.85),0 0 22px rgba(201,162,74,.5)}}
   @keyframes glowCity{0%,100%{text-shadow:0 1px 10px rgba(0,0,0,.9)}50%{text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 10px rgba(255,245,230,.55)}}
   .lynch{animation:flicker 11s linear infinite}
-  .lynch .r,.lynch .p{animation:glowRed 4.2s ease-in-out infinite}
-  .lynch .w{animation:glowIvory 4.2s ease-in-out infinite}
+  .lynch .w,.lynch .r,.lynch .p{animation:glowIvory 4.2s ease-in-out infinite}
   .lynch .word:nth-child(2) span{animation-delay:-.7s}.lynch .word:nth-child(4) span{animation-delay:-1.4s}.lynch .word:nth-child(5) span{animation-delay:-2.1s}
   .date-row .d{animation:glowDate 3.6s ease-in-out infinite}
   .date-row .c{animation:glowCity 3.6s ease-in-out infinite}
@@ -299,7 +298,11 @@ cv.addEventListener('pointermove', e => {
   if (drag) {
     const o = drag, now = performance.now();
     const sx = e.clientX - o.offX, sy = e.clientY - o.offY;
-    const z = clamp(CAM * f / Math.max(sy - hY, 1), 3.2, 11);
+    // objects can be pulled forward until their base reaches the first date box
+    const info = document.getElementById('infocard').getBoundingClientRect();
+    const yMax = Math.max(hY + CAM * f / 3.2, info.top + 10);
+    const zMin = Math.max(.9, CAM * f / (yMax - hY));
+    const z = clamp(CAM * f / Math.max(sy - hY, 1), zMin, 11);
     const wx = clamp((sx - cx) * z / f, -ROOM + .6, ROOM - .6);
     const dt = Math.max((now - o.lastT) / 1000, .008);
     const raw = Math.hypot(wx - o.wx, z - o.wz) / dt;
@@ -368,19 +371,19 @@ function buildCurtains() {
 }
 function drawRoom() {
   const sway = RM ? 0 : 1, rowH = 3, rows = Math.ceil(H / rowH);
-  const A = (Math.sin(t * .41) * 16 + Math.sin(t * .17 + 1.3) * 10 + Math.sin(t * .93 + .4) * 3) * sway;
+  const A = (Math.sin(t * .19) * 16 + Math.sin(t * .08 + 1.3) * 10 + Math.sin(t * .43 + .4) * 3) * sway;
   if (titleEl && sway) titleEl.style.transform = `translateX(calc(-50% + ${(A * .45).toFixed(2)}px)) skewX(${(-A * .07).toFixed(3)}deg) rotate(${(A * .012).toFixed(3)}deg)`;
   const yRef = hY + CAM * f / ZBACK;
   for (let k = 0; k < rows; k++) {
     const y = k * rowH, v = clamp(y / yRef, 0, 1.4);
-    const off = A * v * v + Math.sin(t * 1.3 - v * 5) * 2.2 * v * sway;
+    const off = A * v * v + Math.sin(t * .6 - v * 5) * 2.2 * v * sway;
     ctx.drawImage(curtainCv, (CPAD - off) * DPR, y * DPR, W * DPR, rowH * DPR, 0, y, W, rowH + .5);
   }
   // light breathing across the folds
   if (sway) {
     const bands = 36, bw = W / bands;
     for (let i = 0; i < bands; i++) {
-      const a = .07 + .07 * Math.sin(t * .55 + i * .45) * Math.sin(t * .21 + i * .13);
+      const a = .07 + .07 * Math.sin(t * .26 + i * .45) * Math.sin(t * .1 + i * .13);
       ctx.fillStyle = `rgba(0,0,0,${clamp(a, 0, .2)})`; ctx.fillRect(i * bw, 0, bw + 1, yRef);
     }
   }
@@ -779,7 +782,7 @@ function scheduler() {
     if (o.level < .04) o.idle = true;
     o.ch.pan.pan.setTargetAtTime(clamp((o.panR || 0) * .8 + o.wx / ROOM * .25, -1, 1), now, .5);
     o.ch.lp.frequency.setTargetAtTime(clamp(11000 - (o.wz - 3.2) * 1000, 2500, 11000), now, .1);
-    o.ch.send.gain.setTargetAtTime(o.send + (o.wz - 3.2) / 8 * .5, now, .1);
+    o.ch.send.gain.setTargetAtTime(Math.max(.1, o.send + (o.wz - 3.2) / 8 * .5), now, .1);
     if (o.level < .04) { o.next = Math.max(o.next, hz); V[o.id].rest && V[o.id].rest(o); continue; }
     if (o.next < now) o.next = now + .02;
     V[o.id].tick(o, hz);
