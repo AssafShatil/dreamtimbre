@@ -52,6 +52,7 @@
   .dates{gap:12px}
   .venue{margin-top:3px;font:400 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ivory-dim);text-wrap:balance}
   .dim{color:var(--ivory-dim)}
+  .homage{font:400 10px/1.4 var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--ivory-dim);margin-top:-4px}
   #enter[disabled]{opacity:.5;cursor:progress}
   .card .title{font-size:clamp(28px,6.2vw,76px)}
   .card .title em{font-style:normal;font-weight:400}
@@ -82,7 +83,7 @@
   #mute{position:fixed;top:calc(18px + env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right));z-index:3;
     appearance:none;cursor:pointer;background:rgba(7,5,6,.5);color:var(--ivory);border:1px solid rgba(236,229,214,.35);
     font:500 11px/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;padding:10px 12px 10px 14px}
-  #hint{margin-top:6px;font:400 10px/1.5 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-dim);transition:opacity 3s ease}
+  #hint{margin-top:6px;font:400 10px/1.5 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-dim);transition:opacity 3s ease;text-wrap:balance;max-width:34em}
   #hint.fade{opacity:0}
   body.in #titlecard *{pointer-events:none}
   /* animated glow: title breathes red like a neon behind velvet, with an occasional faulty-bulb flicker;
@@ -117,6 +118,7 @@
     <div class="rule"></div>
     <div class="dates" data-dates></div>
     <div class="meta dim" data-cfg="credit">Music by Assaf Shatil</div>
+    <div class="homage" data-cfg="homage">Homage to David Lynch</div>
     <button id="enter" type="button">Enter the room</button>
     <div class="note" id="loadnote">Sound on. Headphones recommended.</div>
   </div>
@@ -125,6 +127,7 @@
 <div class="hud" id="titlecard">
   <h2 class="title lynch" data-title>DREAM TIMBRE: REALITY NIGHTMARE</h2>
   <div class="eyebrow performer" data-cfg="presenter">Ensemble Musica Nova</div>
+  <div class="homage" data-cfg="homage">Homage to David Lynch</div>
   <div class="hud-hint" id="hint">Hover an object to wake it · drag to move it</div>
 </div>
 <div class="hud" id="infocard">
@@ -138,6 +141,7 @@ const CONFIG = {
   presenter: 'Ensemble Musica Nova',
   title: 'Dream Timbre: Reality Nightmare',
   credit: 'Music by Assaf Shatil',
+  homage: 'Homage to David Lynch',
   dates: [
     { date: '10.10.2026', city: 'Tel Aviv',  venue: 'Felicia Blumental Music Center · 26 Bialik St.' },
     { date: '21.11.2026', city: 'Jerusalem', venue: 'Mazkeka' },
@@ -300,7 +304,7 @@ cv.addEventListener('pointermove', e => {
     const sx = e.clientX - o.offX, sy = e.clientY - o.offY;
     // objects can be pulled forward until their base reaches the first date box
     const info = document.getElementById('infocard').getBoundingClientRect();
-    const yMax = Math.max(hY + CAM * f / 3.2, info.top + 10);
+    const yMax = info.top + 12;
     const zMin = Math.max(.9, CAM * f / (yMax - hY));
     const z = clamp(CAM * f / Math.max(sy - hY, 1), zMin, 11);
     const wx = clamp((sx - cx) * z / f, -ROOM + .6, ROOM - .6);
