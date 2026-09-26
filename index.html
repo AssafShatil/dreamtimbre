@@ -52,7 +52,9 @@
   .dates{gap:12px}
   .venue{margin-top:3px;font:400 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ivory-dim);text-wrap:balance}
   .dim{color:var(--ivory-dim)}
-  .homage{font:400 10px/1.4 var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--ivory-dim);margin-top:-4px}
+  .venue .vp{white-space:nowrap}
+  @media (max-width:560px){ .venue .sep{display:none} .venue .vp{display:block} #infocard .venue{letter-spacing:.1em} }
+  .homage{font:400 10px/1.4 var(--mono);letter-spacing:.3em;text-transform:uppercase;color:rgba(236,229,214,.85);margin-top:-4px;text-shadow:0 1px 8px rgba(0,0,0,.95)}
   #enter[disabled]{opacity:.5;cursor:progress}
   .card .title{font-size:clamp(28px,6.2vw,76px)}
   .card .title em{font-style:normal;font-weight:400}
@@ -175,7 +177,14 @@ document.querySelectorAll('[data-dates]').forEach(el => {
     const b = document.createElement('span'); b.className = 'c'; b.textContent = d.city;
     const wrap = document.createElement('div'); wrap.className = 'date';
     row.append(a, b); wrap.appendChild(row);
-    if (d.venue) { const v = document.createElement('div'); v.className = 'venue'; v.textContent = d.venue; wrap.appendChild(v); }
+    if (d.venue) {
+      const v = document.createElement('div'); v.className = 'venue';
+      d.venue.split(' · ').forEach((part, i) => {
+        if (i) { const sep = document.createElement('span'); sep.className = 'sep'; sep.textContent = ' · '; v.append(sep); }
+        const sp = document.createElement('span'); sp.className = 'vp'; sp.textContent = part; v.append(sp);
+      });
+      wrap.appendChild(v);
+    }
     el.appendChild(wrap);
   });
 });
